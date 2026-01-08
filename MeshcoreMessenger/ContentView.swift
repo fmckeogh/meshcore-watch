@@ -8,7 +8,6 @@ import SwiftUI
 struct ContentView: View {
   @EnvironmentObject var bleManager: BLEManager
   @EnvironmentObject var messageService: MessageService
-  @EnvironmentObject var imageService: ImageService
 
   @State private var showSettingsSheet = false
   @State private var showDeviceListSheet = false
@@ -27,7 +26,7 @@ struct ContentView: View {
           .environmentObject(messageService)
       }
       .sheet(isPresented: $showDeviceListSheet) {
-        DeviceListView()
+          DeviceListView(bleManager: bleManager)
       }
       .onReceive(messageService.$contactToNavigateTo, perform: processContactNavigation)
       .onReceive(messageService.$channelToNavigateTo, perform: processChannelNavigation)
@@ -37,12 +36,6 @@ struct ContentView: View {
           showDeviceListSheet = true
           bleManager.userDidManuallyDisconnect = false
         }
-      }
-      .sheet(isPresented: $showWelcomePopup) {
-        WelcomePopupView()
-      }
-      .onAppear {
-        checkFirstLaunch()
       }
       .background(
         VStack {
@@ -249,13 +242,5 @@ struct ContentView: View {
     }
 
     self.messageService.channelToNavigateTo = nil
-  }
-
-  private func checkFirstLaunch() {
-    let launchedBefore = UserDefaults.standard.bool(forKey: "launchedBefore")
-    if !launchedBefore {
-      showWelcomePopup = true
-      UserDefaults.standard.set(true, forKey: "launchedBefore")
-    }
   }
 }

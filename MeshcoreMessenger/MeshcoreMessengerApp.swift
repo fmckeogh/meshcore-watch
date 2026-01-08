@@ -9,12 +9,10 @@ import SwiftUI
 struct MeshcoreMessengerApp: App {
   @StateObject private var bleManager = BLEManager.shared
   @StateObject private var messageService = MessageService()
-  @StateObject private var imageService: ImageService
 
   init() {
     let msgService = MessageService()
     _messageService = StateObject(wrappedValue: msgService)
-    _imageService = StateObject(wrappedValue: ImageService(messageService: msgService))
   }
 
   var body: some Scene {
@@ -22,7 +20,6 @@ struct MeshcoreMessengerApp: App {
       ContentView()
         .environmentObject(bleManager)
         .environmentObject(messageService)
-        .environmentObject(imageService)
     }
   }
 }

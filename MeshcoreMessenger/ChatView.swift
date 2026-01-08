@@ -8,7 +8,6 @@ import SwiftUI
 struct ChatView: View {
   let contact: Contact
   @EnvironmentObject var messageService: MessageService
-  @EnvironmentObject var imageService: ImageService
 
   @State private var messageText: String = ""
   @State private var showImagePicker = false
@@ -74,9 +73,6 @@ struct ChatView: View {
         .padding(.trailing)
         .disabled(messageText.isEmpty || messageText.count > characterLimit)
       }
-      .sheet(isPresented: $showImagePicker) {
-        ImagePicker(selectedImageData: $selectedImageData)
-      }
       .alert("Sending Large Files", isPresented: $showingImageDisclaimer) {
         Button("I Understand", role: .none) {
           self.showImagePicker = true
@@ -108,13 +104,6 @@ struct ChatView: View {
     .onAppear {
       messageService.markConversationAsRead(for: contact.publicKey)
     }
-    .sheet(isPresented: $showImagePicker) {
-      ImagePicker(selectedImageData: $selectedImageData)
-    }
-    .onChange(of: selectedImageData) { newData in
-      guard let data = newData else { return }
-      imageService.sendImage(imageData: data, to: contact)
-    }
   }
 
   func sendMessage() {
@@ -127,8 +116,6 @@ struct ChatView: View {
 struct MessageView: View {
   let message: Message
 
-  @State private var isImagePresented = false
-
   var body: some View {
     VStack(alignment: message.isFromCurrentUser ? .trailing : .leading) {
       messageContent()
@@ -139,49 +126,19 @@ struct MessageView: View {
         .padding(.horizontal, 15)
     }
     .padding(.vertical, 2)
-    .fullScreenCover(isPresented: $isImagePresented) {
-      if case .image(let data, _) = message.content {
-        FullScreenImageView(isPresented: $isImagePresented, imageData: data)
-      }
-    }
   }
 
   @ViewBuilder
   private func messageContent() -> some View {
     HStack {
       if message.isFromCurrentUser { Spacer() }
-      switch message.content {
-      case .text(let text):
-        Text(text)
+    
+        Text(message.content)
           .padding(10)
           .foregroundColor(message.isFromCurrentUser ? .white : .primary)
           .background(message.isFromCurrentUser ? .blue : Color(UIColor.systemGray5))
           .cornerRadius(10)
-      case .image(let data, let progress):
-        ZStack {
-          if let uiImage = UIImage(data: data) {
-            Image(uiImage: uiImage)
-              .resizable()
-              .scaledToFit()
-              .cornerRadius(10).onTapGesture {
-                self.isImagePresented = true
-              }
-          }
-          if let progress = progress {
-            VStack {
-              Text("Packet \(progress.sentChunks)/\(progress.totalChunks)")
-              ProgressView(value: Double(progress.sentChunks), total: Double(progress.totalChunks))
-                .progressViewStyle(LinearProgressViewStyle(tint: .white))
-            }
-            .padding()
-            .background(Color.black.opacity(0.5))
-            .foregroundColor(.white)
-            .cornerRadius(10)
-          }
-        }
-        .frame(maxWidth: 200, maxHeight: 200)
-        .cornerRadius(10)
-      }
+      
       if !message.isFromCurrentUser { Spacer() }
     }
   }

@@ -203,7 +203,7 @@ class MessageService: NSObject, ObservableObject, UNUserNotificationCenterDelega
   func sendMessage(to contact: Contact, message: String) {
     guard !message.isEmpty else { return }
     let newMessage = Message(
-      content: .text(message), isFromCurrentUser: true, status: .sending, isRead: true)
+      content: message, isFromCurrentUser: true, status: .sending, isRead: true)
 
     Logger.shared.log("Sending CMD_SEND_TXT_MSG to \(contact.name)...")
     var frame = Data()
@@ -228,7 +228,7 @@ class MessageService: NSObject, ObservableObject, UNUserNotificationCenterDelega
 
   func sendChannelMessage(to channel: Channel, message: String) {
     guard !message.isEmpty else { return }
-    let newMessage = Message(content: .text(message), isFromCurrentUser: true, status: .sending)
+    let newMessage = Message(content: message, isFromCurrentUser: true, status: .sending)
     DispatchQueue.main.async {
       self.channelConversations[channel.id, default: []].append(newMessage)
     }
@@ -346,7 +346,7 @@ class MessageService: NSObject, ObservableObject, UNUserNotificationCenterDelega
 
     if let contact = contacts.first(where: { $0.publicKey.prefix(6) == pubkeyPrefix }) {
       let newMessage = Message(
-        content: .text(messageText), isFromCurrentUser: false, status: .delivered, isRead: false)
+        content: messageText, isFromCurrentUser: false, status: .delivered, isRead: false)
       Logger.shared.log("Successfully parsed message '\(messageText)' from \(contact.name)")
 
       showNewMessageNotification(
@@ -393,7 +393,7 @@ class MessageService: NSObject, ObservableObject, UNUserNotificationCenterDelega
 
     let isFromMe = messageText.hasPrefix(self.settings.name)
     let newMessage = Message(
-      content: .text(messageText), isFromCurrentUser: isFromMe, status: .delivered,
+      content: messageText, isFromCurrentUser: isFromMe, status: .delivered,
       isRead: isFromMe ? true : false)
 
     DispatchQueue.main.async {
@@ -423,19 +423,7 @@ class MessageService: NSObject, ObservableObject, UNUserNotificationCenterDelega
     }
   }
 
-  func updateImageProgress(for contactKey: Data, messageID: UUID, progress: ImageUploadProgress?) {
-    guard var conversation = conversations[contactKey],
-      let index = conversation.firstIndex(where: { $0.id == messageID })
-    else {
-      return
-    }
-    guard case .image(let data, _) = conversation[index].content else { return }
 
-    conversation[index].content = .image(data: data, progress: progress)
-    DispatchQueue.main.async {
-      self.conversations[contactKey] = conversation
-    }
-  }
 
   func markConversationAsRead(for contactKey: Data) {
     guard var conversation = conversations[contactKey] else { return }

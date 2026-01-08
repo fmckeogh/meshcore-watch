@@ -7,7 +7,7 @@ import CoreBluetooth
 import SwiftUI
 
 struct DeviceListView: View {
-  @EnvironmentObject var bleManager: BLEManager
+  @ObservedObject var bleManager: BLEManager
   @Environment(\.presentationMode) var presentationMode
 
   var body: some View {
