@@ -38,7 +38,6 @@ struct ChannelChatView: View {
       HStack {
         VStack(alignment: .trailing) {
           TextField("Message in #\(channel.name)", text: $messageText)
-            .textFieldStyle(RoundedBorderTextFieldStyle())
             .padding(.leading)
 
           Text("\(messageText.count) / \(characterLimit)")

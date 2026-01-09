@@ -12,15 +12,12 @@ struct ChatView: View {
   @State private var messageText: String = ""
   @State private var showImagePicker = false
   @State private var selectedImageData: Data?
-  @State private var showConversationSettings = false
 
   private let characterLimit = 140
 
   private var messages: [Message] {
     messageService.conversations[contact.publicKey] ?? []
   }
-
-  @State private var showingImageDisclaimer = false
 
   var body: some View {
     VStack {
@@ -49,16 +46,10 @@ struct ChatView: View {
       Spacer()
 
       HStack {
-        Button(action: { showingImageDisclaimer = true }) {
-          Image(systemName: "plus.circle.fill")
-            .font(.title2)
-        }
-        .padding(.leading)
 
         VStack(alignment: .trailing) {
           TextField("Enter your message...", text: $messageText)
-            .textFieldStyle(RoundedBorderTextFieldStyle())
-
+        
           // AJOUT : Le compteur de caractères
           Text("\(messageText.count) / \(characterLimit)")
             .font(.caption)
@@ -73,34 +64,9 @@ struct ChatView: View {
         .padding(.trailing)
         .disabled(messageText.isEmpty || messageText.count > characterLimit)
       }
-      .alert("Sending Large Files", isPresented: $showingImageDisclaimer) {
-        Button("I Understand", role: .none) {
-          self.showImagePicker = true
-          self.showingImageDisclaimer = false
-        }
-        Button("Cancel", role: .cancel) {
-          self.showingImageDisclaimer = false
-        }
-      } message: {
-        Text(
-          "Warning: Sending images consumes significant network bandwidth. Please use this feature with caution, especially in areas with limited node availability."
-        )
-      }
       .padding(.bottom)
     }
     .navigationTitle(contact.name)
-    .toolbar {
-      ToolbarItem(placement: .navigationBarTrailing) {
-        Button(action: {
-          showConversationSettings = true
-        }) {
-          Image(systemName: "gearshape.fill")
-        }
-      }
-    }.sheet(isPresented: $showConversationSettings) {
-      ConversationSettingsView(contact: contact)
-        .environmentObject(messageService)
-    }
     .onAppear {
       messageService.markConversationAsRead(for: contact.publicKey)
     }
@@ -135,8 +101,8 @@ struct MessageView: View {
     
         Text(message.content)
           .padding(10)
-          .foregroundColor(message.isFromCurrentUser ? .white : .primary)
-          .background(message.isFromCurrentUser ? .blue : Color(UIColor.systemGray5))
+          .foregroundColor(.white)
+          .background(message.isFromCurrentUser ? .blue : Color(UIColor.lightGray))
           .cornerRadius(10)
       
       if !message.isFromCurrentUser { Spacer() }

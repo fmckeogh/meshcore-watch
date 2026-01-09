@@ -5,6 +5,7 @@
 
 import Foundation
 import UserNotifications
+import Combine
 
 class MessageService: NSObject, ObservableObject, UNUserNotificationCenterDelegate {
 
@@ -17,7 +18,6 @@ class MessageService: NSObject, ObservableObject, UNUserNotificationCenterDelega
   @Published var channelConversations: [UInt8: [Message]] {
     didSet { PersistenceService.saveChannelConversations(channelConversations) }
   }
-  @Published var echoEnabledContacts: [Data: Bool] = [:]
   @Published var settings = NodeSettings()
   @Published var contactToNavigateTo: Contact?
   @Published var channelToNavigateTo: Channel?
@@ -77,7 +77,7 @@ class MessageService: NSObject, ObservableObject, UNUserNotificationCenterDelega
     let responseCode = data[0]
 
     switch responseCode {
-    case 2...8, 12, 16, 17, 0x10, 0x82, 0x83, 0x88:
+    case 2...8, 12, 16, 17, 0x82, 0x83, 0x88:
       handleProtocolPacket(data)
     default:
       Logger.shared.log(
@@ -331,15 +331,29 @@ class MessageService: NSObject, ObservableObject, UNUserNotificationCenterDelega
     } else {
       // New contact
       pendingContacts.append(receivedContact)
-      Logger.shared.log("Added new contact: \(receivedContact.name)")
+        Logger.shared.log("Added new contact: \(receivedContact.name) (\(receivedContact.publicKey.hexEncodedString()))")
     }
   }
 
   private func parseReceivedMessage(from data: Data) {
-    let textOffset = 13
-    guard data.count > textOffset else { return }
+      assert(data[0] == 7 || data[0] == 16)
+      
+      let textOffset =  if data[0] == 7 {
+          13
+      } else {
+         16
+      }
+      
+      assert(data.count > textOffset)
+      
+      let pubkeyPrefix = if data[0] == 7 {
+          data.subdata(in: 1..<7)
+      } else {
+          data.subdata(in: 4..<10)
+      }
+      
 
-    let pubkeyPrefix = data.subdata(in: 1..<7)
+      
     let messageText =
       String(data: data.subdata(in: textOffset..<data.count), encoding: .utf8)
       ?? "Unreadable message"
@@ -362,13 +376,6 @@ class MessageService: NSObject, ObservableObject, UNUserNotificationCenterDelega
         self.unreadMessageCounts[contact.publicKey] = currentCount + 1
       }
 
-      if echoEnabledContacts[contact.publicKey] == true {
-        Logger.shared.log("   -> Echo mode is ON for \(contact.name). Sending message back.")
-
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
-          self.sendMessage(to: contact, message: messageText)
-        }
-      }
     } else {
       Logger.shared.log(
         "Warning: Received message but could not find a matching contact for prefix \(pubkeyPrefix.hexEncodedString())"
@@ -401,7 +408,6 @@ class MessageService: NSObject, ObservableObject, UNUserNotificationCenterDelega
     }
 
     if !isFromMe {
-      let senderName = String(messageText.split(separator: ":").first ?? "Someone")
       showNewMessageNotification(
         title: "#\(channel.name)",
         body: messageText,
@@ -541,13 +547,5 @@ class MessageService: NSObject, ObservableObject, UNUserNotificationCenterDelega
     completionHandler([.banner, .sound, .badge])
   }
 
-  func toggleEcho(for contactKey: Data) {
-    let currentState = echoEnabledContacts[contactKey] ?? false
-    DispatchQueue.main.async {
-      self.echoEnabledContacts[contactKey] = !currentState
-    }
-    Logger.shared.log(
-      "Echo mode for \(contactKey.hexEncodedString()) is now \(!currentState ? "ON" : "OFF")")
-  }
 
 }
