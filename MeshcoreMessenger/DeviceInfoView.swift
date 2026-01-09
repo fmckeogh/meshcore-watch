@@ -11,6 +11,6 @@ struct DeviceInfoView: View {
     @EnvironmentObject var messageService: MessageService
 
     var body: some View {
-        Text(String(messageService.batteryMilliVolts ?? 0) + "mV")
+        Text(String(messageService.batteryMilliVolts ?? 0) + "mV").onAppear(perform: messageService.getBatteryAndStorage)
     }
 }

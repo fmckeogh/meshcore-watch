@@ -54,8 +54,12 @@ class BLEManager: NSObject, ObservableObject, CBCentralManagerDelegate,
 
     func startScan() {
         discoveredPeripherals.removeAll()
-        Logger.shared.log("BLEManager: Starting USER scan...")
-        isAutoReconnecting = false
+     
+        let hasLastPeripheralIdentifier = UserDefaults.standard.string(forKey: lastPeripheralIdentifierKey) != nil
+        isAutoReconnecting = hasLastPeripheralIdentifier && !userDidManuallyDisconnect
+        
+        Logger.shared.log("BLEManager: starting scan (is auto reconnecting: \(isAutoReconnecting))")
+        
         centralManager.scanForPeripherals(
             withServices: [uartServiceUUID],
             options: nil
@@ -94,41 +98,33 @@ class BLEManager: NSObject, ObservableObject, CBCentralManagerDelegate,
         peripheral.writeValue(data, for: characteristic, type: .withResponse)
     }
 
-    private func startAutoReconnectScan() {
-
-        guard !isConnected, !isManualDisconnect else { return }
-
-        guard
-            UserDefaults.standard.string(forKey: lastPeripheralIdentifierKey)
-                != nil
-        else {
-            Logger.shared.log(
-                "BLEManager: No last device to auto-reconnect to."
-            )
-            centralManager.scanForPeripherals(
-                withServices: [uartServiceUUID],
-                options: nil
-            )
-            return
-        }
-
-        Logger.shared.log("BLEManager: Starting AUTO-RECONNECT scan...")
-        isAutoReconnecting = true
-
-        centralManager.scanForPeripherals(
-            withServices: [uartServiceUUID],
-            options: nil
-        )
-    }
-
     // MARK: - Delegate Methods
     func centralManagerDidUpdateState(_ central: CBCentralManager) {
-        if central.state == .poweredOn {
-            Logger.shared.log("BLEManager: Bluetooth is On.")
-            startAutoReconnectScan()
-        } else {
-            Logger.shared.log("BLEManager: Bluetooth is not powered on.")
+       
+        switch central.state {
+        case .poweredOn:
+            Logger.shared.log("BLEManager: bluetooth powered on")
+            startScan()
+            
+        case .poweredOff:
+            Logger.shared.log("BLEManager: bluetooth powered off")
+            
+        case .unauthorized:
+            Logger.shared.log("BLEManager: bluetooth unauthorized")
+            
+        case .unsupported:
+            Logger.shared.log("BLEManager: bluetooth unsupported")
+            
+        case .resetting:
+            Logger.shared.log("BLEManager: bluetooth resetting")
+            
+        case .unknown:
+            Logger.shared.log("BLEManager: bluetooth unknown")
+            
+        default:
+            Logger.shared.log("BLEManager: default case undefined state")
         }
+       
     }
 
     func centralManager(
@@ -188,7 +184,7 @@ class BLEManager: NSObject, ObservableObject, CBCentralManagerDelegate,
         )
 
         isAutoReconnecting = false
-        startAutoReconnectScan()
+        startScan()
     }
 
     func centralManager(
@@ -203,14 +199,20 @@ class BLEManager: NSObject, ObservableObject, CBCentralManagerDelegate,
         DispatchQueue.main.async {
             self.isConnected = false
             if self.isManualDisconnect {
-
                 self.userDidManuallyDisconnect = true
                 self.isManualDisconnect = false
             } else {
-
-                self.startAutoReconnectScan()
+                self.startScan()
             }
         }
+    }
+    
+    func centralManager(_ central: CBCentralManager, didUpdateANCSAuthorizationFor peripheral: CBPeripheral) {
+        Logger.shared.log("BLEManager: didUpdateANCSAuthorizationFor")
+    }
+    
+    func centralManager(_ central: CBCentralManager, connectionEventDidOccur event: CBConnectionEvent, for peripheral: CBPeripheral) {
+        Logger.shared.log("BLEManager: connection event")
     }
 
     func peripheral(
@@ -225,7 +227,7 @@ class BLEManager: NSObject, ObservableObject, CBCentralManagerDelegate,
             )
         }
     }
-
+    
     func peripheral(
         _ peripheral: CBPeripheral,
         didDiscoverCharacteristicsFor service: CBService,

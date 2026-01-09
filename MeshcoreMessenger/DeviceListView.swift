@@ -25,7 +25,6 @@ struct DeviceListView: View {
             .foregroundColor(.primary)
         }
       }
-    .onAppear(perform: bleManager.startScan)
     .onDisappear(perform: bleManager.stopScan)
   }
 }
