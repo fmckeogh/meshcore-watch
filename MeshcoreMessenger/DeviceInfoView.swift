@@ -11,6 +11,39 @@ struct DeviceInfoView: View {
     @EnvironmentObject var messageService: MessageService
 
     var body: some View {
-        Text(String(messageService.batteryMilliVolts ?? 0) + "mV").onAppear(perform: messageService.getBatteryAndStorage)
+        List {
+            HStack {
+                Text("Name")
+                Spacer()
+                Text(messageService.settings.name)
+            }
+            IntInfoRowView(name: "Battery", value: messageService.batteryMilliVolts, unit: "mV")
+            IntInfoRowView(name: "Used storage", value: messageService.usedStorage, unit: "KB")
+            IntInfoRowView(name: "Total storage", value: messageService.totalStorage, unit: "KB")
+            HStack {
+                Text("Public key")
+                Spacer()
+                if let pubkey = messageService.getSelfPublicKey() {
+                    Text(pubkey.hexEncodedString()).foregroundStyle(.secondary)
+                }
+            }
+        }
+        .onAppear(perform: messageService.getBatteryAndStorage)
+    }
+}
+
+struct IntInfoRowView: View {
+    var name: String;
+    var value: Int?;
+    var unit: String;
+    
+    var body: some View {
+        HStack {
+            Text(name)
+            Spacer()
+            if let value = value {
+                Text(String(value) + " " + unit).foregroundStyle(.secondary)
+            }
+        }
     }
 }

@@ -15,8 +15,7 @@ extension Notification.Name {
 class BLEManager: NSObject, ObservableObject, CBCentralManagerDelegate,
     CBPeripheralDelegate
 {
-
-    nonisolated(unsafe) static let shared = BLEManager()
+    static let shared = BLEManager()
 
     @Published var isConnected = false
     @Published var discoveredPeripherals: [CBPeripheral] = []

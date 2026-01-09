@@ -23,6 +23,8 @@ class MessageService: NSObject, ObservableObject, UNUserNotificationCenterDelega
   @Published var channelToNavigateTo: Channel?
   @Published private(set) var unreadMessageCounts: [Data: Int] = [:]
   @Published var batteryMilliVolts: Int?
+  @Published var usedStorage: Int?
+  @Published var totalStorage: Int?
 
   // MARK: - Private State
   private var selfPublicKey: Data?
@@ -163,10 +165,16 @@ class MessageService: NSObject, ObservableObject, UNUserNotificationCenterDelega
       break
     case 12:  // RESP_CODE_BATT_AND_STORAGE
       guard data.count >= 3 else { return }
+        
       let milliVolts = data.subdata(in: 1..<3).to(type: UInt16.self).littleEndian
-      Logger.shared.log("Received battery level: \(milliVolts) mV")
+      let usedStorage = data.subdata(in: 3..<7).to(type: UInt32.self).littleEndian
+      let totalStorage = data.subdata(in: 7..<11).to(type: UInt32.self).littleEndian
+        
+      Logger.shared.log("Received battery level and storage: \(milliVolts) mV, \(usedStorage)KB/\(totalStorage)KB")
       DispatchQueue.main.async {
         self.batteryMilliVolts = Int(milliVolts)
+        self.usedStorage = Int(usedStorage)
+        self.totalStorage = Int(totalStorage)
       }
       break
     case 0x83:
