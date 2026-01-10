@@ -9,9 +9,11 @@ import SwiftUI
 
 struct DeviceInfoView: View {
     @EnvironmentObject var messageService: MessageService
+    @EnvironmentObject var bleManager: BLEManager
 
     var body: some View {
         List {
+            Button("Disconnect", role: .destructive, action: bleManager.disconnect )
             HStack {
                 Text("Name")
                 Spacer()

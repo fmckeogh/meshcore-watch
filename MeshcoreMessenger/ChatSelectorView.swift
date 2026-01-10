@@ -18,7 +18,7 @@ struct ChatSelectorView: View {
                     Text(contact.name)
                 }
             }
-        }
+        }.onAppear{ messageService.syncNextMessage() }
     }
 }
 
