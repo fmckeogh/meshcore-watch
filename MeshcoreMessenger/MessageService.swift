@@ -551,7 +551,6 @@ class MessageService: NSObject, ObservableObject, UNUserNotificationCenterDelega
   ) {
 
     Logger.shared.log("Notification received while app is in foreground.")
-
     completionHandler([.banner, .sound, .badge])
   }
 

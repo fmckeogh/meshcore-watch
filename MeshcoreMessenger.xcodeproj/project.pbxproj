@@ -79,6 +79,13 @@
 			);
 			target = 127BE3C22F10602700806F64 /* MeshCore Watch App */;
 		};
+		127BE42B2F12EE4800806F64 /* Exceptions for "MeshCore Watch App" folder in "MeshCore Watch App" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				"MeshCore-Watch-App-Info.plist",
+			);
+			target = 127BE3C22F10602700806F64 /* MeshCore Watch App */;
+		};
 		348CE61A2E5CA381009F408A /* Exceptions for "MeshcoreMessenger" folder in "MeshcoreMessenger" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
@@ -91,6 +98,9 @@
 /* Begin PBXFileSystemSynchronizedRootGroup section */
 		127BE3C72F10602700806F64 /* MeshCore Watch App */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				127BE42B2F12EE4800806F64 /* Exceptions for "MeshCore Watch App" folder in "MeshCore Watch App" target */,
+			);
 			path = "MeshCore Watch App";
 			sourceTree = "<group>";
 		};
@@ -343,7 +353,9 @@
 				DEVELOPMENT_TEAM = 7N2YJCXP6S;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = "MeshCore-Watch-App-Info.plist";
 				INFOPLIST_KEY_CFBundleDisplayName = MeshCore;
+				INFOPLIST_KEY_NSBluetoothAlwaysUsageDescription = "Bluetooth is required to connect to MeshCore devices.";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
 				INFOPLIST_KEY_WKWatchOnly = YES;
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -376,7 +388,9 @@
 				DEVELOPMENT_TEAM = 7N2YJCXP6S;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = "MeshCore-Watch-App-Info.plist";
 				INFOPLIST_KEY_CFBundleDisplayName = MeshCore;
+				INFOPLIST_KEY_NSBluetoothAlwaysUsageDescription = "Bluetooth is required to connect to MeshCore devices.";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
 				INFOPLIST_KEY_WKWatchOnly = YES;
 				LD_RUNPATH_SEARCH_PATHS = (
