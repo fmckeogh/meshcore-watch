@@ -53,12 +53,17 @@ class BLEManager: NSObject, ObservableObject, CBCentralManagerDelegate,
 
     func startScan() {
         discoveredPeripherals.removeAll()
-     
-        let hasLastPeripheralIdentifier = UserDefaults.standard.string(forKey: lastPeripheralIdentifierKey) != nil
-        isAutoReconnecting = hasLastPeripheralIdentifier && !userDidManuallyDisconnect
-        
-        Logger.shared.log("BLEManager: starting scan (is auto reconnecting: \(isAutoReconnecting))")
-        
+
+        let hasLastPeripheralIdentifier =
+            UserDefaults.standard.string(forKey: lastPeripheralIdentifierKey)
+            != nil
+        isAutoReconnecting =
+            hasLastPeripheralIdentifier && !userDidManuallyDisconnect
+
+        Logger.shared.log(
+            "BLEManager: starting scan (is auto reconnecting: \(isAutoReconnecting))"
+        )
+
         centralManager.scanForPeripherals(
             withServices: [uartServiceUUID],
             options: nil
@@ -99,31 +104,31 @@ class BLEManager: NSObject, ObservableObject, CBCentralManagerDelegate,
 
     // MARK: - Delegate Methods
     func centralManagerDidUpdateState(_ central: CBCentralManager) {
-       
+
         switch central.state {
         case .poweredOn:
             Logger.shared.log("BLEManager: bluetooth powered on")
             startScan()
-            
+
         case .poweredOff:
             Logger.shared.log("BLEManager: bluetooth powered off")
-            
+
         case .unauthorized:
             Logger.shared.log("BLEManager: bluetooth unauthorized")
-            
+
         case .unsupported:
             Logger.shared.log("BLEManager: bluetooth unsupported")
-            
+
         case .resetting:
             Logger.shared.log("BLEManager: bluetooth resetting")
-            
+
         case .unknown:
             Logger.shared.log("BLEManager: bluetooth unknown")
-            
+
         default:
             Logger.shared.log("BLEManager: default case undefined state")
         }
-       
+
     }
 
     func centralManager(
@@ -132,11 +137,10 @@ class BLEManager: NSObject, ObservableObject, CBCentralManagerDelegate,
         advertisementData: [String: Any],
         rssi RSSI: NSNumber
     ) {
-
-        if !discoveredPeripherals.contains(where: {
-            $0.identifier == peripheral.identifier
-        }) {
-            DispatchQueue.main.async {
+        DispatchQueue.main.async {
+            if !self.discoveredPeripherals.contains(where: {
+                $0.identifier == peripheral.identifier
+            }) {
                 self.discoveredPeripherals.append(peripheral)
             }
         }
@@ -205,12 +209,19 @@ class BLEManager: NSObject, ObservableObject, CBCentralManagerDelegate,
             }
         }
     }
-    
-    func centralManager(_ central: CBCentralManager, didUpdateANCSAuthorizationFor peripheral: CBPeripheral) {
+
+    func centralManager(
+        _ central: CBCentralManager,
+        didUpdateANCSAuthorizationFor peripheral: CBPeripheral
+    ) {
         Logger.shared.log("BLEManager: didUpdateANCSAuthorizationFor")
     }
-    
-    func centralManager(_ central: CBCentralManager, connectionEventDidOccur event: CBConnectionEvent, for peripheral: CBPeripheral) {
+
+    func centralManager(
+        _ central: CBCentralManager,
+        connectionEventDidOccur event: CBConnectionEvent,
+        for peripheral: CBPeripheral
+    ) {
         Logger.shared.log("BLEManager: connection event")
     }
 
@@ -226,7 +237,7 @@ class BLEManager: NSObject, ObservableObject, CBCentralManagerDelegate,
             )
         }
     }
-    
+
     func peripheral(
         _ peripheral: CBPeripheral,
         didDiscoverCharacteristicsFor service: CBService,

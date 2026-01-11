@@ -17,9 +17,8 @@ struct ChatSelectorView: View {
                 NavigationLink(destination: ChatView(contact: contact)) {
                     Text(contact.name)
                 }
-            }
-        }.onAppear{ messageService.syncNextMessage() }
+            }.navigationTitle(Text("Contacts"))
+        }
+        .onAppear { messageService.syncNextMessage() }
     }
 }
-
-

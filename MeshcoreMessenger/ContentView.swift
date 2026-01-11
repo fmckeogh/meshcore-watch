@@ -10,20 +10,20 @@ import SwiftUI
 struct ContentView: View {
     @EnvironmentObject var bleManager: BLEManager
     @EnvironmentObject var messageService: MessageService
-    
+
     var body: some View {
         if bleManager.isConnected {
             TabView {
                 DeviceInfoView()
                 ChatSelectorView()
                 Text("channel view")
-                .padding()
-               }
-               .tabViewStyle(PageTabViewStyle())
+                    .padding()
+            }
+            .tabViewStyle(PageTabViewStyle())
         } else {
-           DeviceListView(bleManager: bleManager)
+            DeviceListView(bleManager: bleManager)
         }
-        
+
     }
 }
 

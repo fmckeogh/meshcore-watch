@@ -13,15 +13,15 @@ struct MeshCore_Watch_AppApp: App {
     @StateObject private var messageService = MessageService()
 
     init() {
-      let msgService = MessageService()
-      _messageService = StateObject(wrappedValue: msgService)
+        let msgService = MessageService()
+        _messageService = StateObject(wrappedValue: msgService)
     }
 
     var body: some Scene {
-      WindowGroup {
-        ContentView()
-          .environmentObject(bleManager)
-          .environmentObject(messageService)
-      }
+        WindowGroup {
+            ContentView()
+                .environmentObject(bleManager)
+                .environmentObject(messageService)
+        }
     }
 }
