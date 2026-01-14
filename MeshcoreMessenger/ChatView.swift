@@ -35,7 +35,7 @@ struct ChatView: View {
                         )
                     }
                 }
-                .onChange(of: messages) { _ in
+                .onChange(of: messages) { _, _ in
                     if let lastMessage = messages.last {
                         withAnimation {
                             scrollViewProxy.scrollTo(
@@ -54,29 +54,10 @@ struct ChatView: View {
             Spacer()
 
             HStack {
-
-                VStack(alignment: .trailing) {
-                    TextField("Enter your message...", text: $messageText)
-
-                    // AJOUT : Le compteur de caractères
-                    Text("\(messageText.count) / \(characterLimit)")
-                        .font(.caption)
-                        .foregroundColor(
-                            messageText.count > characterLimit ? .red : .gray
-                        )
-                        .padding(.trailing, 5)
-                }
-
-                Button(action: sendMessage) {
-                    Image(systemName: "arrow.up.circle.fill")
-                        .font(.largeTitle)
-                }
-                .padding(.trailing)
-                .disabled(
-                    messageText.isEmpty || messageText.count > characterLimit
-                )
+                TextField("Message", text: $messageText)
+                    .submitLabel(.send)
+                    .onSubmit(sendMessage)
             }
-            .padding(.bottom)
         }
         .navigationTitle(contact.name)
         .onAppear {
@@ -139,3 +120,14 @@ struct MessageView: View {
         }
     }
 }
+
+#Preview {
+    ChatView(
+        contact: Contact(
+            id: UUID(),
+            publicKey: Data([0, 0, 0, 0]),
+            name: "Test Contact"
+        )
+    )
+}
+

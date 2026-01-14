@@ -24,7 +24,7 @@ struct ChannelChatView: View {
                         MessageView(message: message)
                     }
                 }
-                .onChange(of: messages) { _ in
+                .onChange(of: messages) { _,_ in
                     if let lastMessage = messages.last {
                         withAnimation {
                             scrollViewProxy.scrollTo(
